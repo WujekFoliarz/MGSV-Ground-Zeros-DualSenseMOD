@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35013.160
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MGSV-Ground-Zeroes-DualSenseMOD", "MGSV-Ground-Zeros-DualSenseMOD\MGSV-Ground-Zeroes-DualSenseMOD.csproj", "{CC78292F-149E-468F-B45C-8F28A4816F54}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CC78292F-149E-468F-B45C-8F28A4816F54}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC78292F-149E-468F-B45C-8F28A4816F54}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC78292F-149E-468F-B45C-8F28A4816F54}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC78292F-149E-468F-B45C-8F28A4816F54}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5B0ADBBD-CA7E-476E-8084-526D0EB2A7E4}
+	EndGlobalSection
+EndGlobal

@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-
-namespace MGSV_Ground_Zeros_DualSenseMOD
+﻿namespace MGSV_Ground_Zeros_DualSenseMOD
 {
     public class Haptics
     {

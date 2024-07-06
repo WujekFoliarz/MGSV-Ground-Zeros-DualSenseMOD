@@ -1,12 +1,9 @@
-﻿using Wujek_Dualsense_API;
-using Memory;
-using System.Diagnostics;
-using MGSV_Ground_Zeros_DualSenseMOD;
-using Nefarius.ViGEm.Client.Targets;
+﻿using MGSV_Ground_Zeros_DualSenseMOD;
 using Nefarius.ViGEm.Client;
-using Windows.Media.Protection.PlayReady;
-using Nefarius.ViGEm.Client.Targets.DualShock4;
+using Nefarius.ViGEm.Client.Targets;
 using Nefarius.ViGEm.Client.Targets.Xbox360;
+using System.Diagnostics;
+using Wujek_Dualsense_API;
 
 bool Running = true;
 Dualsense dualsense = null;
@@ -37,7 +34,7 @@ new Thread(() =>
     Thread.Sleep(1000);
     while (Running)
     {
-        if(dualsense != null && dualsense.Working)
+        if (dualsense != null && dualsense.Working)
         {
             x360Controller.SetButtonState(Xbox360Button.A, dualsense.ButtonState.cross);
             x360Controller.SetButtonState(Xbox360Button.B, dualsense.ButtonState.circle);
@@ -92,6 +89,7 @@ try
     bool idroidOpenFirstTime = true;
     bool helicopterTabFirstTime = true;
     bool lzconfirmed = false;
+    bool markerRemoved = false;
     Stopwatch sw = Stopwatch.StartNew();
 
     while (Running)
@@ -101,13 +99,14 @@ try
         IDroidTab IDroidTAB = game.GetIDroidTab();
         HoveringOverinIDroid HoveringOver = game.GetHoveringOver();
         int clipSize = game.GetClipSize();
-
+        bool isAutomatic = game.IsGunAutomatic();
+        Console.WriteLine(Zoom);
         switch (Zoom)
         {
             case FOVZoomedIn.Yes:
                 if (dualsense.ButtonState.options)
                 {
-                    triggerThreshold = 5;
+                    triggerThreshold = 255;
                     dualsense.SetLeftTrigger(TriggerType.TriggerModes.Rigid_A, 0, 250, 255, 0, 0, 0, 0);
                     dualsense.SetRightTrigger(TriggerType.TriggerModes.Rigid_A, 0, 250, 255, 0, 0, 0, 0);
 
@@ -119,14 +118,18 @@ try
                     }
                 }
 
-                if (IDroidTAB == IDroidTab.Map && HoveringOver == HoveringOverinIDroid.Nothing && dualsense.ButtonState.cross && sw.ElapsedMilliseconds > 500)
+                if (IDroidTAB == IDroidTab.Map && dualsense.ButtonState.cross && sw.ElapsedMilliseconds > 500)
                 {
-                    dualsense.PlayHaptics(Haptics.MarkerPlaced, 0.5f, 0, 0, true);
-                    sw.Restart();
-                }
-                else if (IDroidTAB == IDroidTab.Map && HoveringOver == HoveringOverinIDroid.Marker && dualsense.ButtonState.cross && sw.ElapsedMilliseconds > 500)
-                {
-                    dualsense.PlayHaptics(Haptics.MarkerRemoved, 0.5f, 0, 0, true);
+                    if (!markerRemoved)
+                    {
+                        dualsense.PlayHaptics(Haptics.MarkerPlaced, 0.5f, 0, 0, true);
+                        markerRemoved = true;
+                    }
+                    else
+                    {
+                        dualsense.PlayHaptics(Haptics.MarkerRemoved, 0.5f, 0, 0, true);
+                        markerRemoved = false;
+                    }
                     sw.Restart();
                 }
 
@@ -147,46 +150,19 @@ try
                 }
 
                 break;
-            case FOVZoomedIn.No:
-                if (!idroidOpenFirstTime && sw.ElapsedMilliseconds > 2000)
+            case FOVZoomedIn.Default:               
+                if (clipSize > 0 && x360Controller.LeftTrigger > 120)
                 {
-                    idroidOpenFirstTime = true;
-                    lzconfirmed = false;
-                    dualsense.PlayHaptics(Haptics.TerminalOFF, 1, 1, 1, false);
-                    dualsense.SetLightbarTransition(0, 0, 0, 5, 10);
-                }
-
-                if (x360Controller.LeftTrigger > triggerThreshold && clipSize > 1)
-                {
-                    switch (currentWeapon)
+                    switch (isAutomatic)
                     {
-                        case WeaponType.None:
-                            dualsense.SetLeftTrigger(TriggerType.TriggerModes.Rigid_B, 0, 0, 0, 0, 0, 0, 0);
-                            dualsense.SetRightTrigger(TriggerType.TriggerModes.Rigid_B, 0, 0, 0, 0, 0, 0, 0);
-                            triggerThreshold = 5;
-                            break;
-                        case WeaponType.C4:
-                            dualsense.SetLeftTrigger(TriggerType.TriggerModes.Rigid, 0, 0, 0, 0, 0, 0, 0);
-                            dualsense.SetRightTrigger(TriggerType.TriggerModes.Rigid_A, 20, 1, 20, 0, 0, 0, 0);
-                            triggerThreshold = 120;
-                            break;
-                        case WeaponType.Granade:
-                            dualsense.SetLeftTrigger(TriggerType.TriggerModes.Rigid, 0, 0, 0, 0, 0, 0, 0);
-                            dualsense.SetRightTrigger(TriggerType.TriggerModes.Rigid_A, 20, 1, 20, 0, 0, 0, 0);
-                            triggerThreshold = 120;
-                            break;
-                        case WeaponType.Rifle:
+                        case true:
                             dualsense.SetLeftTrigger(TriggerType.TriggerModes.Rigid, 0, 0, 0, 0, 0, 0, 0);
                             dualsense.SetRightTrigger(TriggerType.TriggerModes.Pulse_B, 10, 255, 50, 0, 0, 0, 0);
                             triggerThreshold = 120;
                             break;
-                        case WeaponType.Pistol:
-                            if(clipSize > 8)
-                            {
-                                dualsense.SetLeftTrigger(TriggerType.TriggerModes.Rigid, 0, 0, 0, 0, 0, 0, 0);
-                                dualsense.SetRightTrigger(TriggerType.TriggerModes.Pulse_B, 10, 255, 50, 0, 0, 0, 0);
-                            }
-
+                        case false:
+                            dualsense.SetLeftTrigger(TriggerType.TriggerModes.Rigid, 0, 0, 0, 0, 0, 0, 0);
+                            dualsense.SetRightTrigger(TriggerType.TriggerModes.Rigid_AB, 93, 184, 255, 143, 71, 0, 0);
                             triggerThreshold = 120;
                             break;
                     }
@@ -196,6 +172,49 @@ try
                     dualsense.SetRightTrigger(TriggerType.TriggerModes.Rigid_B, 0, 0, 0, 0, 0, 0, 0);
                 }
 
+                if (!idroidOpenFirstTime && sw.ElapsedMilliseconds > 2000)
+                {
+                    idroidOpenFirstTime = true;
+                    lzconfirmed = false;
+                    dualsense.PlayHaptics(Haptics.TerminalOFF, 1, 1, 1, false);
+                    dualsense.SetLightbarTransition(0, 0, 0, 5, 10);
+                }
+                break;
+            case FOVZoomedIn.Second_Default:
+                if (clipSize > 0 && x360Controller.LeftTrigger > 120)
+                {
+                    switch (isAutomatic)
+                    {
+                        case true:
+                            dualsense.SetLeftTrigger(TriggerType.TriggerModes.Rigid, 0, 0, 0, 0, 0, 0, 0);
+                            dualsense.SetRightTrigger(TriggerType.TriggerModes.Pulse_B, 10, 255, 50, 0, 0, 0, 0);
+                            triggerThreshold = 120;
+                            break;
+                        case false:
+                            dualsense.SetLeftTrigger(TriggerType.TriggerModes.Rigid, 0, 0, 0, 0, 0, 0, 0);
+                            dualsense.SetRightTrigger(TriggerType.TriggerModes.Rigid_AB, 93, 184, 255, 143, 71, 0, 0);
+                            triggerThreshold = 120;
+                            break;
+                    }
+                }
+                else
+                {
+                    dualsense.SetRightTrigger(TriggerType.TriggerModes.Rigid_B, 0, 0, 0, 0, 0, 0, 0);
+                }
+
+                if (!idroidOpenFirstTime && sw.ElapsedMilliseconds > 2000)
+                {
+                    idroidOpenFirstTime = true;
+                    lzconfirmed = false;
+                    dualsense.PlayHaptics(Haptics.TerminalOFF, 1, 1, 1, false);
+                    dualsense.SetLightbarTransition(0, 0, 0, 5, 10);
+                }
+                break;
+            case FOVZoomedIn.Spotted:
+                dualsense.SetLightbarTransition(0, 255, 255, 5, 5);
+                break;
+            case FOVZoomedIn.Spotted_or_Dying:
+                dualsense.SetLightbarTransition(255, 0, 0, 5, 5);
                 break;
         }
 

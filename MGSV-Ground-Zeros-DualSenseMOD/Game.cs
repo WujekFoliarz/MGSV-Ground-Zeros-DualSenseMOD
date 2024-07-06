@@ -1,11 +1,5 @@
 ﻿using Memory;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Windows.Media.AppBroadcasting;
 
 namespace MGSV_Ground_Zeros_DualSenseMOD
 {
@@ -43,23 +37,39 @@ namespace MGSV_Ground_Zeros_DualSenseMOD
         {
             return mem.ReadInt(Pointers.ClipSize);
         }
+
+        public bool IsGunAutomatic()
+        {
+            switch (mem.ReadInt(Pointers.IsAutomatic))
+            {
+                case 1:
+                    return true;
+                case 0:
+                    return false;
+                default:
+                    return false;
+            }
+        }
     }
 
     public enum WeaponType
     {
         None = 0,
-        C4 = 3,
-        Magazine = 8,
-        Granade = 12,
-        Flare_Granade = 13,
-        Rifle = 14,
-        Pistol = 16,
+        C4 = 12,
+        Empty_Magazine = 32,
+        Granade = 48,
+        Flare_Granade = 52,
+        Rifle = 56,
+        Pistol = 64,
     }
 
     public enum FOVZoomedIn
     {
-        No = 0,
+        Default = 0,
+        Second_Default = 1,
         Yes = 4,
+        Spotted_or_Dying = 1024,
+        Spotted = 1025,
     }
 
     public enum IDroidTab
@@ -80,10 +90,11 @@ namespace MGSV_Ground_Zeros_DualSenseMOD
 
     internal class Pointers
     {
-        public static string EquippedWeaponType = "MgsGroundZeroes.exe+01ED8048,18,210,460";
-        public static string Zoom = "MgsGroundZeroes.exe+01E1EB50,2F0,30,120,30,8";
-        public static string IDroidTAB = "MgsGroundZeroes.exe+01ED8060,30,100,150,5B8";
-        public static string IDroidHover = "MgsGroundZeroes.exe+01ED8060,30,100,20,8,160,3D4";
-        public static string ClipSize = "MgsGroundZeroes.exe+01E5E918,430,48,268,3F4";
+        public static readonly string IsAutomatic = "MgsGroundZeroes.exe+01E7E3A8,68,B4C";
+        public static readonly string EquippedWeaponType = "MgsGroundZeroes.exe+01E7E3A8,28,98,D88,B38";
+        public static readonly string Zoom = "MgsGroundZeroes.exe+01E1EB50,2F0,30,120,30,8";
+        public static readonly string IDroidTAB = "MgsGroundZeroes.exe+01ED8060,30,100,150,5B8";
+        public static readonly string IDroidHover = "MgsGroundZeroes.exe+01ED8060,30,100,20,8,160,3D4";
+        public static readonly string ClipSize = "MgsGroundZeroes.exe+01E5E918,430,48,268,3F4";
     }
 }

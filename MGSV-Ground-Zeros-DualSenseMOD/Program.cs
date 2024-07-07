@@ -5,12 +5,22 @@ using Nefarius.ViGEm.Client.Targets.Xbox360;
 using System.Diagnostics;
 using Wujek_Dualsense_API;
 
+Thread.Sleep(8000);
+
+if(Process.GetProcessesByName("MGSV-Ground-Zeroes-DualSenseMOD").Count() > 1)
+{
+    Environment.Exit(0);
+}
+
 bool Running = true;
 Dualsense dualsense = null;
 int triggerThreshold = 5;
 
 ViGEmClient client = new ViGEmClient();
 IXbox360Controller x360Controller = client.CreateXbox360Controller();
+bool sendRumble = false;
+x360Controller.FeedbackReceived += X360Controller_FeedbackReceived;
+
 x360Controller.Connect();
 
 
@@ -78,13 +88,21 @@ new Thread(() =>
 
 }).Start();
 
+void X360Controller_FeedbackReceived(object sender, Xbox360FeedbackReceivedEventArgs e)
+{
+    if (sendRumble)
+    {
+        dualsense.SetVibrationType(Vibrations.VibrationType.Standard_Rumble);
+        dualsense.SetStandardRumble(e.LargeMotor, e.SmallMotor);
+    }
+}
+
 new Thread(() => LookForControllers()).Start();
 Thread.Sleep(1000);
 
 Game game = new Game();
 try
 {
-    dualsense.SetVibrationType(Vibrations.VibrationType.Haptic_Feedback);
     dualsense.SetPlayerLED(LED.PlayerLED.PLAYER_1);
     bool idroidOpenFirstTime = true;
     bool helicopterTabFirstTime = true;
@@ -94,18 +112,30 @@ try
 
     while (Running)
     {
+        if (Process.GetProcessesByName("MgsGroundZeroes").Count() == 0)
+        {
+            Running = false;
+            dualsense.Dispose();
+            Thread.Sleep(1000);
+            Environment.Exit(0);
+        }
+
+        dualsense.SetVibrationType(Vibrations.VibrationType.Haptic_Feedback);
+
         WeaponType currentWeapon = game.GetEquippedWeapon();
         FOVZoomedIn Zoom = game.GetZoomStatus();
         IDroidTab IDroidTAB = game.GetIDroidTab();
         HoveringOverinIDroid HoveringOver = game.GetHoveringOver();
         int clipSize = game.GetClipSize();
         bool isAutomatic = game.IsGunAutomatic();
-        Console.WriteLine(Zoom);
+        
         switch (Zoom)
         {
             case FOVZoomedIn.Yes:
+                sendRumble = false;
+                dualsense.SetVibrationType(Vibrations.VibrationType.Haptic_Feedback);
                 if (dualsense.ButtonState.options)
-                {
+                {                  
                     triggerThreshold = 255;
                     dualsense.SetLeftTrigger(TriggerType.TriggerModes.Rigid_A, 0, 250, 255, 0, 0, 0, 0);
                     dualsense.SetRightTrigger(TriggerType.TriggerModes.Rigid_A, 0, 250, 255, 0, 0, 0, 0);
@@ -150,7 +180,8 @@ try
                 }
 
                 break;
-            case FOVZoomedIn.Default:               
+            case FOVZoomedIn.Default:
+                sendRumble = true;
                 if (clipSize > 0 && x360Controller.LeftTrigger > 120)
                 {
                     switch (isAutomatic)
@@ -181,6 +212,7 @@ try
                 }
                 break;
             case FOVZoomedIn.Second_Default:
+                sendRumble = true;
                 if (clipSize > 0 && x360Controller.LeftTrigger > 120)
                 {
                     switch (isAutomatic)
@@ -211,9 +243,11 @@ try
                 }
                 break;
             case FOVZoomedIn.Spotted:
+                sendRumble = true;
                 dualsense.SetLightbarTransition(0, 255, 255, 5, 5);
                 break;
             case FOVZoomedIn.Spotted_or_Dying:
+                sendRumble = true;
                 dualsense.SetLightbarTransition(255, 0, 0, 5, 5);
                 break;
         }

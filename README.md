@@ -16,3 +16,4 @@ https://github.com/nefarius/ViGEmBus/releases/tag/v1.22.0
 
 ---
 yes i know the repo has a spelling mistake
+If you need help: my discord - wujek_foliarz

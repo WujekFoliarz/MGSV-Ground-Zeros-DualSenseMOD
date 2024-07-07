@@ -1,3 +1,5 @@
+## USB RECOMMENDED
+
 ### Features
 - Adaptive triggers
 - Haptic Feedback for IDroid

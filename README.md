@@ -1,4 +1,5 @@
 ## USB RECOMMENDED
+## Windows Defender may detect it as false positive
 
 ### Features
 - Adaptive triggers
